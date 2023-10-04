@@ -22,20 +22,11 @@ if [ -z "$1" ]
 fi
 testDir=${dirRoot}/${intelVersion}/SHiELD_build/${branch}
 logDir=${testDir}/log
-export MODULESHOME=/usr/share/lmod/lmod
-## create directories
-rm -rf ${testDir}
-mkdir -p ${logDir}
-# salloc commands to start up 
-#2 tests layout 8,8 (16 nodes)
-#2 tests layout 4,8 (8 nodes)
-#9 tests layout 4,4 (18 nodes)
-#5 tests layout 4,1 (5 nodes)
-#17 tests layout 2,2 (17 nodes)
-#salloc --partition=p2 -N 64 -J ${branch} sleep 20m &
+# Set up build
+cd ${testDir}/SHiELD_build/Build
+#Define External Libs path
+export EXTERNAL_LIBS=${dirRoot}/externallibs
+# Build SHiELD
+set -o pipefail
+singularity exec -B /contrib ${container} ${container_env_script} "./COMPILE solo sw 64bit repro intel clean"
 
-## clone code
-cd ${testDir}
-git clone --recursive https://github.com/NOAA-GFDL/SHiELD_build.git
-## Check out the PR and checkout code
-cd ${testDir}/SHiELD_build && git fetch origin ${branch}:toMerge && git merge toMerge && ./CHECKOUT_code
